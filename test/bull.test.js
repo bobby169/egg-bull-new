@@ -3,11 +3,11 @@
 const assert = require('assert');
 const mock = require('egg-mock');
 
-describe('test/bull.test.js', () => {
+describe('test/queue-bull.test.js', () => {
   let app;
   before(() => {
     app = mock.app({
-      baseDir: 'apps/bull',
+      baseDir: 'apps/queue-bull-test',
     });
     return app.ready();
   });
@@ -15,24 +15,56 @@ describe('test/bull.test.js', () => {
   after(() => app.close());
   afterEach(mock.restore);
 
-  it('should OK', () => {
-    assert(app.bull);
+  it('should create bull instances', () => {
+    assert(app.bull.get('q1'));
+    assert(app.bull.get('q2'));
   });
 
-  it('should work', done => {
-    app.bull.add(
-      { job1: 'this is a job' },
-      {
-        removeOnComplete: true, // 任务成功后自动删除
-        removeOnFail: false, // 任务失败后自动删除（可选）
-      }
-    );
-    app.bull.process(job => {
-      if (job.data.job1 === 'this is a job') {
-        done();
-        return Promise.resolve(1);
-      }
-      done(new Error());
+  it('should has app queue property', () => {
+    assert(app.queue);
+    assert(app.queue.q1 instanceof app.Queue);
+    assert(app.queue.q2 instanceof app.Queue);
+    assert(app.queue.q3 instanceof app.Queue);
+  });
+
+  it('should has app ctx property', () => {
+    const ctx = app.mockContext();
+    assert(ctx.queue);
+    assert(ctx.queue.q1 instanceof app.Queue);
+    assert(ctx.queue.q2 instanceof app.Queue);
+    assert(ctx.queue.q3 instanceof app.Queue);
+  });
+
+  it('should add job to q1', () => {
+    return app.queue.q1
+      .add(
+        { foo: 'bar' },
+        {
+          // delay: 10000, // 延迟10秒再被处理
+          removeOnComplete: true, // 任务成功后自动删除
+          removeOnFail: true, // 任务失败后自动删除（可选）
+        }
+      )
+      .then(job => {
+        assert(job.id);
+        assert(job.data.foo === 'bar');
+        assert(job.queue.name === 'q1');
+      });
+  });
+
+  it('should add job to q2', () => {
+    return app.queue.q2.add({ foo: 'bar' }).then(job => {
+      assert(job.id);
+      assert(job.data.foo === 'bar');
+      assert(job.queue.name === 'q2');
+    });
+  });
+
+  it('should add job to q3', () => {
+    return app.queue.q3.add({ foo: 'bar' }).then(job => {
+      assert(job.id);
+      assert(job.data.foo === 'bar');
+      assert(job.queue.name === 'q3');
     });
   });
 });
