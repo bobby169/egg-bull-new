@@ -1,17 +1,17 @@
-'use strict';
+"use strict";
 
-exports.keys = '123456';
+exports.keys = "123456";
 
 exports.bull = {
   clients: {
-    q1: { name: 'q1' },
-    q2: { name: 'q2' },
+    q1: { name: "q1" },
+    q2: { name: "q2" },
   },
   default: {
     redis: {
-      host: 'localhost',
-      port: '6379',
-      password: 'foobared',
+      host: "localhost",
+      port: 6379,
+      password: "foobared",
       db: 0,
     },
   },

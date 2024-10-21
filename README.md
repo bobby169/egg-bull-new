@@ -79,11 +79,22 @@ see [config/config.default.js](config/config.default.js) for more detail.
 ## Example
 
 ```js
-app.bull.process(job => {
-  console.log(job.data, job1); // 'this is a job'
-});
+// {app_root}/app/queue/video.js
+module.exports = app => {
+  const queue = app.bull.get('videoQueue');
 
-app.bull.add({ job1: 'this is a job' });
+  queue.process((job, done) => {
+    job.progress(42);
+    done();
+  });
+
+  return queue;
+};
+
+// {app_root}/app/controller/video.js
+async function (ctx) {
+  await ctx.queue.video.add({ video: 'http://example.com/video1.mov' });
+};
 ```
 
 For Bull's api read [Reference](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueclose) for more details.
