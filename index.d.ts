@@ -1,4 +1,4 @@
-import { QueueOptions, Queue } from "bull";
+import { QueueOptions, Queue as BullQueue } from "bull";
 
 interface IBullConfig extends QueueOptions {
   name?: string;
@@ -18,9 +18,9 @@ declare module "egg" {
   export interface Application {
     queue: Record<string, any>;
     bull: {
-      get(name: string): Queue;
+      get(name: string): BullQueue;
     };
   }
 }
 
-export * from "bull";
+export { BullQueue as Queue };
